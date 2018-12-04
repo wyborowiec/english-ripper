@@ -31,7 +31,7 @@ def getSaveFileConsumer(def fileName) {
     }
 }
 
-def getMp3FromUrl(def path) {
+def getMp3FromUrl(def path, def name) {
     def audioUrl = 'https://edesk.pearson.pl' + path
     def xml = download(audioUrl, {
         connection ->
@@ -41,10 +41,10 @@ def getMp3FromUrl(def path) {
     })
 
     def groups = (xml =~ /\"\/Audio\/GetAudio\?access_token=([0-9a-f\-]*)\"/)
-    println groups.size()
+//    println groups.size()
 //    println 'res: ' + groups[0][1]
     def accessToken = groups[0][1]
-    def fileName = path.replaceAll("[/?=]+", "")
+    def fileName = name + "-" + path.replaceAll("[/?=]+", "")
     download(MP3_URL + accessToken, getSaveFileConsumer(fileName))
 }
 
@@ -62,11 +62,19 @@ def parseCollectiom(def nr) {
     }
 }
 
-def audioLinks = parseCollectiom(2)
-println audioLinks
-audioLinks.each {
-    getMp3FromUrl(it)
+def downloadCollection(def nr, def name) {
+    def audioLinks = parseCollectiom(nr)
+    println audioLinks
+    audioLinks.each {
+        getMp3FromUrl(it, name)
+    }
 }
+
+downloadCollection("1", "cd1")
+downloadCollection("2", "cd2")
+downloadCollection("3", "cd3")
+downloadCollection("1231", "workbook")
+downloadCollection("1276", "wordlist")
 //getMp3FromUrl('Index/1?p=1')
 
 //download(mp3Url + '496908cf-69d0-4438-bebb-960a6339dada', getSaveFileConsumer('1-2'))
